@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Secureum Race Extension",
+  "version": "1.0",
+  "description": "Extension to simulate Secureum Race tests",
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["https://ventral.digital/posts/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ]
+}

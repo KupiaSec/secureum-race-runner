@@ -1,0 +1,151 @@
+.secureum-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+}
+
+.secureum-button-container {
+  width: 120px;
+  height: 120px;
+  position: relative;
+  cursor: pointer;
+}
+
+.secureum-button {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: none;
+  background: rgba(128, 128, 128, 0.15);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.secureum-button:hover {
+  background: rgba(128, 128, 128, 0.25);
+  box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.3);
+}
+
+.secureum-button.running {
+  background: rgba(255, 71, 87, 0.25);
+}
+
+.secureum-button.running:hover {
+  background: rgba(255, 71, 87, 0.35);
+  box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.3);
+}
+
+.secureum-icon {
+  width: 48px;
+  height: 48px;
+  transition: all 0.3s ease;
+}
+
+.secureum-icon.start {
+  color: #2ed573;
+}
+
+.secureum-icon.stop {
+  color: #ff4757;
+}
+
+.secureum-progress-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.secureum-progress-ring circle {
+  fill: transparent;
+  stroke-width: 4;
+}
+
+.secureum-progress-ring .progress-ring-bg {
+  stroke: rgba(128, 128, 128, 0.2);
+}
+
+.secureum-progress-ring .progress-ring-fg {
+  stroke: #ff4757;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+.secureum-timer {
+  position: absolute;
+  top: 130px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #666;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 6px 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'DS-Digital', 'Seven Segment', monospace;
+  letter-spacing: 2px;
+}
+
+/* Digital font fallback */
+@font-face {
+  font-family: 'DS-Digital';
+  src: url('https://db.onlinewebfonts.com/t/f810b366b49ba3c9e4d8dee518f4d153.woff2') format('woff2');
+}
+
+/* Question result indicators */
+.question-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-left: 10px;
+  font-size: 0.9em;
+}
+
+.question-result.correct {
+  background: rgba(46, 213, 115, 0.15);
+  color: #2ed573;
+}
+
+.question-result.wrong {
+  background: rgba(255, 71, 87, 0.15);
+  color: #ff4757;
+}
+
+.question-result .percentage {
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+
+.final-score-container {
+  margin: 20px 0;
+  padding: 20px;
+  background: rgba(0, 112, 243, 0.1);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.final-score {
+  font-size: 2em;
+  font-weight: bold;
+  color: #0070f3;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.solution-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
