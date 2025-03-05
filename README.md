@@ -62,6 +62,9 @@ While anyone can study Secureum's race questions and solutions on Ventral Digita
 - Calculating scores using the same scoring system as real races
 - Eliminating the need for manual timing and scoring
 
+## Note
+The extension uses the ImgBB API to upload the result image. The API key of free tier is hardcoded in the extension and is limited to some number of requests per day, feel free to replace it with your own.
+
 ## Disclaimer
 
 This extension is a helper tool for practicing Secureum races. We do not hold any rights to Secureum content or races. All Secureum content belongs to its respective owners. This tool is designed solely to enhance the practice experience for security researchers using publicly available Secureum race content on Ventral Digital.

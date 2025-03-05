@@ -610,39 +610,30 @@ class SecureumRace {
         finalScoreContainer.className = 'final-score-container';
 
         // Style the container
-        finalScoreContainer.style.position = 'fixed';
-        finalScoreContainer.style.top = '50%';
-        finalScoreContainer.style.left = '50%';
-        finalScoreContainer.style.transform = 'translate(-50%, -50%)';
-        finalScoreContainer.style.zIndex = '1000';
-        finalScoreContainer.style.padding = '24px 30px';
-        finalScoreContainer.style.borderRadius = '12px';
-        finalScoreContainer.style.background = 'linear-gradient(45deg, #4776E6, #8E54E9)';
-        finalScoreContainer.style.color = 'white';
-        finalScoreContainer.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
-        finalScoreContainer.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-        finalScoreContainer.style.backdropFilter = 'blur(5px)';
-        finalScoreContainer.style.transition = 'all 0.3s ease';
-        finalScoreContainer.style.width = '320px';
-        finalScoreContainer.style.maxWidth = '90%';
-        finalScoreContainer.style.textAlign = 'center';
+        finalScoreContainer.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999999;
+            padding: 24px 30px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #4776E6, #8E54E9);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-family: system-ui, -apple-system, sans-serif;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+            display: block;
+        `;
 
-        // Add hover effects
-        finalScoreContainer.addEventListener('mouseenter', () => {
-            finalScoreContainer.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.25)';
-        });
-
-        finalScoreContainer.addEventListener('mouseleave', () => {
-            finalScoreContainer.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
-        });
-
-        // Create share text for X (note: this initial share doesn't include an image URL)
-        const shareText = encodeURIComponent(`I just completed a @TheSecureum Race with @KupiaSecurity! Score: ${finalScore}% (${fullyCorrectCount}/${totalQuestions} correct) in ${completionTime}!`);
-
-        // Create share URL
-        const shareUrl = `https://twitter.com/intent/tweet?text=${shareText}`;
-
-        finalScoreContainer.innerHTML = `
+        // Create the content container first
+        const contentContainer = document.createElement('div');
+        contentContainer.innerHTML = `
             <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">Score: ${finalScore}%</div>
             <div style="font-size: 14px; opacity: 0.9;">Correct: ${fullyCorrectCount}/${totalQuestions} questions</div>
             <div style="font-size: 14px; opacity: 0.9;">Completed in ${completionTime}</div>
@@ -651,7 +642,7 @@ class SecureumRace {
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 6px;">
                         <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632 3.218 3.203 3.203 0 0 1-.865.115 3.23 3.23 0 0 1-.614-.057 3.283 3.283 0 0 0 3.067 2.277A6.588 6.588 0 0 1 .78 13.58a6.32 6.32 0 0 1-.78-.045A9.344 9.344 0 0 0 5.026 15z"/>
                     </svg>
-                    Share on X
+                    Share Results
                 </button>
                 <div id="image-preview" style="display: none; margin-top: 10px; width: 100%;"></div>
             </div>
@@ -660,10 +651,69 @@ class SecureumRace {
             </div>
         `;
 
+        // Create close button
+        const closeButton = document.createElement('div');
+        closeButton.style.position = 'absolute';
+        closeButton.style.top = '10px';
+        closeButton.style.right = '10px';
+        closeButton.style.width = '24px';
+        closeButton.style.height = '24px';
+        closeButton.style.borderRadius = '50%';
+        closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+        closeButton.style.display = 'flex';
+        closeButton.style.alignItems = 'center';
+        closeButton.style.justifyContent = 'center';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.transition = 'all 0.2s ease';
+        closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+
+        closeButton.addEventListener('mouseenter', () => {
+            closeButton.style.background = 'rgba(255, 255, 255, 0.3)';
+        });
+
+        closeButton.addEventListener('mouseleave', () => {
+            closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+        });
+
+        closeButton.addEventListener('click', () => {
+            finalScoreContainer.remove();
+        });
+
+        // Add hover effects to container
+        finalScoreContainer.addEventListener('mouseenter', () => {
+            finalScoreContainer.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.25)';
+        });
+
+        finalScoreContainer.addEventListener('mouseleave', () => {
+            finalScoreContainer.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+        });
+
+        // Append elements in the correct order
+        finalScoreContainer.appendChild(closeButton);
+        finalScoreContainer.appendChild(contentContainer);
         document.body.appendChild(finalScoreContainer);
+
+        // Check and adjust position after adding to DOM
+        const checkAndAdjustScorePosition = () => {
+            setTimeout(() => {
+                const rect = finalScoreContainer.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+
+                // If popup is taller than viewport, position at top with some padding
+                if (rect.height > viewportHeight * 0.9) {
+                    finalScoreContainer.style.top = '5vh';
+                    finalScoreContainer.style.transform = 'translateX(-50%)';
+                    finalScoreContainer.style.maxHeight = '90vh';
+                }
+            }, 10);
+        };
+
+        checkAndAdjustScorePosition();
 
         // Add event listener to generate image button
         document.getElementById('generate-image-btn').addEventListener('click', () => {
+            // Close the original popup when generating the image
+            finalScoreContainer.remove();
             this.generateResultImage(pageTitle, finalScore, fullyCorrectCount, totalQuestions, completionTime);
         });
     }
@@ -687,18 +737,6 @@ class SecureumRace {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Extract direct image URL and viewer URL from the response
-                // The API response structure is:
-                // {
-                //   data: {
-                //     url_viewer: "https://ibb.co/2ndCYJK", <- This is what we need for sharing
-                //     url: "https://i.ibb.co/w04Prt6/c1f64245afb2.gif",
-                //     display_url: "https://i.ibb.co/98W13PY/c1f64245afb2.gif",
-                //     ...
-                //   },
-                //   success: true
-                // }
-
                 let directImageUrl = '';
                 let viewerUrl = '';
 
@@ -712,49 +750,25 @@ class SecureumRace {
                     directImageUrl = data.data.image.url;
                 } else if (data.data.url) {
                     directImageUrl = data.data.url;
-                } else if (data.data.display_url && data.data.display_url.includes('i.ibb.co')) {
+                } else if (data.data.display_url) {
                     directImageUrl = data.data.display_url;
-                } else {
-                    directImageUrl = data.data.display_url || '';
-                }
-
-                // Transform the URL from ImgBB format to kupia.io format
-                let kupiaUrl = directImageUrl;
-                if (directImageUrl && directImageUrl.includes('i.ibb.co')) {
-                    try {
-                        // Extract the image identifier parts
-                        const urlParts = directImageUrl.split('i.ibb.co/')[1].split('/');
-                        if (urlParts.length >= 2) {
-                            // Construct the new URL format
-                            kupiaUrl = `https://www.kupia.io/image/${urlParts[0]}%2F${urlParts[1]}`;
-                        }
-                    } catch (e) {
-                        console.error('Error transforming URL:', e);
-                        // Keep original URL if transformation fails
-                    }
                 }
 
                 callback(true, {
                     url: directImageUrl,  // The direct image URL
                     url_viewer: viewerUrl, // The viewer URL for sharing
-                    display_url: kupiaUrl, // The transformed kupia.io URL
                     delete_url: data.data.delete_url
                 });
             } else {
-                console.error('ImgBB upload failed:', data);
                 callback(false, null);
             }
         })
         .catch(error => {
-            console.error('Error uploading to ImgBB:', error);
             callback(false, null);
         });
     }
 
     generateResultImage(pageTitle, finalScore, fullyCorrectCount, totalQuestions, completionTime) {
-        // Change button text immediately to show action is happening
-        document.getElementById('generate-image-btn').textContent = 'Regenerate Image';
-
         // Create canvas for image generation
         const canvas = document.createElement('canvas');
         canvas.width = 800;
@@ -872,14 +886,33 @@ class SecureumRace {
         // Convert canvas to data URL
         const dataUrl = canvas.toDataURL('image/png');
 
-        // Create image element to preview
-        const imagePreview = document.getElementById('image-preview');
-        imagePreview.style.display = 'block';
-        imagePreview.style.margin = '0 auto';
-        imagePreview.style.maxWidth = '100%';
+        // Create a new popup for the share options
+        const sharePopup = document.createElement('div');
+        sharePopup.className = 'share-popup';
+        sharePopup.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999999;
+            padding: 24px 30px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #4776E6, #8E54E9);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            font-family: system-ui, -apple-system, sans-serif;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            width: 350px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+            display: block;
+        `;
 
         // Show loading state with the generated image clearly visible
-        imagePreview.innerHTML = `
+        sharePopup.innerHTML = `
             <div style="text-align: center; padding: 10px; margin: 0 auto; max-width: 320px;">
                 <div style="margin-bottom: 8px; font-weight: 500;">Uploading image...</div>
                 <img src="${dataUrl}" style="width: 100%; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
@@ -894,14 +927,62 @@ class SecureumRace {
             </div>
         `;
 
+        // Add close button to share popup
+        const closeButton = document.createElement('div');
+        closeButton.style.position = 'absolute';
+        closeButton.style.top = '10px';
+        closeButton.style.right = '10px';
+        closeButton.style.width = '24px';
+        closeButton.style.height = '24px';
+        closeButton.style.borderRadius = '50%';
+        closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+        closeButton.style.display = 'flex';
+        closeButton.style.alignItems = 'center';
+        closeButton.style.justifyContent = 'center';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.transition = 'all 0.2s ease';
+        closeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+
+        closeButton.addEventListener('mouseenter', () => {
+            closeButton.style.background = 'rgba(255, 255, 255, 0.3)';
+        });
+
+        closeButton.addEventListener('mouseleave', () => {
+            closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+        });
+
+        closeButton.addEventListener('click', () => {
+            sharePopup.remove();
+        });
+
+        sharePopup.appendChild(closeButton);
+        document.body.appendChild(sharePopup);
+
+        // Check and adjust position after adding to DOM
+        const checkAndAdjustSharePosition = () => {
+            setTimeout(() => {
+                const rect = sharePopup.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+
+                // If popup is taller than viewport, position at top with some padding
+                if (rect.height > viewportHeight * 0.9) {
+                    sharePopup.style.top = '5vh';
+                    sharePopup.style.transform = 'translateX(-50%)';
+                    sharePopup.style.maxHeight = '90vh';
+                }
+            }, 10);
+        };
+
+        checkAndAdjustSharePosition();
+
         // Upload to ImgBB
         this.uploadToImgBB(dataUrl, (success, result) => {
             if (success) {
-                // Use the ImgBB sharing URL (data.data.url_viewer) instead of the kupia.io URL
-                const tweetText = `I just completed a @TheSecureum Race with @KupiaSecurity! Score: ${finalScore}% (${fullyCorrectCount}/${totalQuestions} correct) in ${completionTime}! ${result.url_viewer}`;
+                // Use the ImgBB sharing URL instead of the kupia.io URL
+                const tweetText = `Just completed a race of @TheSecureum using @KupiaSecurity's Secureum Race Runner! Score: ${finalScore}% (${fullyCorrectCount}/${totalQuestions} correct)! ${result.url_viewer}`;
                 const shareText = encodeURIComponent(tweetText);
 
-                imagePreview.innerHTML = `
+                sharePopup.innerHTML = `
                     <div style="text-align: center; margin: 0 auto; max-width: 350px;">
                         <img src="${dataUrl}" style="width: 100%; max-width: 300px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
                         <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -924,9 +1005,10 @@ class SecureumRace {
                         </div>
                     </div>
                 `;
+                sharePopup.appendChild(closeButton);
             } else {
                 // Fallback to download only if upload fails
-                imagePreview.innerHTML = `
+                sharePopup.innerHTML = `
                     <div style="text-align: center; margin: 0 auto; max-width: 350px;">
                         <img src="${dataUrl}" style="width: 100%; max-width: 300px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
                         <div style="margin-bottom: 10px; color: #ff4757;">Image upload failed. You can still download and share manually.</div>
@@ -941,6 +1023,7 @@ class SecureumRace {
                         </div>
                     </div>
                 `;
+                sharePopup.appendChild(closeButton);
             }
         });
     }
@@ -1022,7 +1105,6 @@ class SecureumRace {
                 const button = findButtonByText(buttonText);
 
                 if (button) {
-                    console.log(`Clicking button: ${buttonText}`);
                     button.click();
 
                     // Wait before clicking the next button
@@ -1030,7 +1112,6 @@ class SecureumRace {
                         clickSequentially(index + 1);
                     }, 500);
                 } else {
-                    console.log(`Button not found: ${buttonText}`);
                     // Try the next button anyway
                     setTimeout(() => {
                         clickSequentially(index + 1);
