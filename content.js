@@ -149,6 +149,9 @@ class SecureumRace {
         const radius = 48;
         const circumference = 2 * Math.PI * radius;
 
+        // Click navigation buttons
+        this.clickNavigationButtons();
+
         // Background circle
         const bgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         bgCircle.setAttribute('class', 'progress-ring-bg');
@@ -548,6 +551,7 @@ class SecureumRace {
     calculateScore() {
         let totalQuestions = 0;
         let correctAnswers = 0;
+        let fullyCorrectCount = 0; // Track fully correct answers
 
         // Refresh solutions before calculating score
         this.findSolutions();
@@ -572,6 +576,11 @@ class SecureumRace {
                     const score = Math.max(0, (correctCount / correctOptions.length) - (incorrectCount / (4 - correctOptions.length)));
 
                     correctAnswers += score;
+
+                    // Increment fully correct count if score is 1 (100%)
+                    if (score === 1) {
+                        fullyCorrectCount++;
+                    }
 
                     // Add result indicator
                     this.addQuestionResult(questionElement, score, score === 1);
@@ -626,6 +635,7 @@ class SecureumRace {
 
         finalScoreContainer.innerHTML = `
             <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">Score: ${finalScore}%</div>
+            <div style="font-size: 14px; opacity: 0.9;">Correct: ${fullyCorrectCount}/${totalQuestions} questions</div>
             <div style="font-size: 14px; opacity: 0.9;">Completed in ${completionTime}</div>
             <div style="margin-top: 12px; font-size: 12px; opacity: 0.8;">
                 Track your progress at <a href="https://kupia.io" target="_blank" style="color: white; text-decoration: none; font-weight: 600;">kupia.io ↗</a>
@@ -668,6 +678,69 @@ class SecureumRace {
                 });
             }
         });
+    }
+
+    clickNavigationButtons() {
+        // Wait for the page to fully load
+        setTimeout(() => {
+            // Try to find and click the buttons in order
+            const buttonSelectors = [
+                'button:has-text("Ethereum/EVM")',
+                'button:has-text("Secureum Bootcamp")',
+                'button:has-text("Epoch ∞")'
+            ];
+
+            // Function to find button by text
+            const findButtonByText = (text) => {
+                // Try different methods to find the button
+                let button = null;
+
+                // Method 1: Using querySelector with attribute contains
+                const buttons = document.querySelectorAll('button');
+                for (const btn of buttons) {
+                    if (btn.textContent.trim() === text) {
+                        button = btn;
+                        break;
+                    }
+                }
+
+                // Method 2: Using XPath if Method 1 fails
+                if (!button) {
+                    const xpath = `//button[text()="${text}"]`;
+                    const result = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+                    button = result.singleNodeValue;
+                }
+
+                return button;
+            };
+
+            // Click buttons in sequence with delays
+            const clickSequentially = (index) => {
+                if (index >= buttonSelectors.length) return;
+
+                const buttonText = buttonSelectors[index].replace('button:has-text("', '').replace('")', '');
+                const button = findButtonByText(buttonText);
+
+                if (button) {
+                    console.log(`Clicking button: ${buttonText}`);
+                    button.click();
+
+                    // Wait before clicking the next button
+                    setTimeout(() => {
+                        clickSequentially(index + 1);
+                    }, 500);
+                } else {
+                    console.log(`Button not found: ${buttonText}`);
+                    // Try the next button anyway
+                    setTimeout(() => {
+                        clickSequentially(index + 1);
+                    }, 500);
+                }
+            };
+
+            // Start clicking buttons
+            clickSequentially(0);
+        }, 2000); // Wait 2 seconds for the page to load
     }
 }
 
