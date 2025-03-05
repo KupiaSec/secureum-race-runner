@@ -9,6 +9,7 @@ A browser extension that helps security researchers simulate Secureum races in a
 - Hides solutions until the race is complete
 - Tracks your progress with detailed scoring per question
 - Provides a clean, distraction-free practice environment
+- Generate and share beautiful result cards directly to social media
 
 ## Installation
 
@@ -41,7 +42,15 @@ A browser extension that helps security researchers simulate Secureum races in a
    - You'll see a percentage score and the number of fully correct answers
    - Each question will be marked with a check (✓) or X (✗) and its score percentage
 
-4. **Quick Access to Races**
+4. **Share Your Results**
+   - Click the "Generate Image" button to create a beautiful result card with your race results
+   - The image will automatically upload and prepare for sharing
+   - You can:
+     - Download the image directly and manually attach it to your social media posts (recommended for best visual results)
+     - Share on X with a single click (includes your score, completion time, and image URL)
+   - The result card includes your score, correct answers count, and completion time
+
+5. **Quick Access to Races**
    - When not on a Secureum race page, click the extension icon in your browser toolbar
    - You'll see a motivational message and a link to start practicing
 

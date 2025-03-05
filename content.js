@@ -596,22 +596,26 @@ class SecureumRace {
         const finalScore = Math.round((correctAnswers / totalQuestions) * 100);
         const completionTime = this.formatTime(this.timerDuration - this.remainingTime);
 
+        // Get the page title for sharing
+        const pageTitle = document.title || 'Secureum Race';
+
         // Remove existing final score if present
         const existingFinalScore = document.querySelector('.final-score-container');
         if (existingFinalScore) {
             existingFinalScore.remove();
         }
 
-        // Create and insert final score container with floating style
+        // Create final score popup
         const finalScoreContainer = document.createElement('div');
         finalScoreContainer.className = 'final-score-container';
 
-        // Apply floating styles
+        // Style the container
         finalScoreContainer.style.position = 'fixed';
-        finalScoreContainer.style.bottom = '20px';
-        finalScoreContainer.style.right = '20px';
+        finalScoreContainer.style.top = '50%';
+        finalScoreContainer.style.left = '50%';
+        finalScoreContainer.style.transform = 'translate(-50%, -50%)';
         finalScoreContainer.style.zIndex = '1000';
-        finalScoreContainer.style.padding = '16px 20px';
+        finalScoreContainer.style.padding = '24px 30px';
         finalScoreContainer.style.borderRadius = '12px';
         finalScoreContainer.style.background = 'linear-gradient(45deg, #4776E6, #8E54E9)';
         finalScoreContainer.style.color = 'white';
@@ -619,30 +623,326 @@ class SecureumRace {
         finalScoreContainer.style.fontFamily = 'system-ui, -apple-system, sans-serif';
         finalScoreContainer.style.backdropFilter = 'blur(5px)';
         finalScoreContainer.style.transition = 'all 0.3s ease';
-        finalScoreContainer.style.minWidth = '200px';
+        finalScoreContainer.style.width = '320px';
+        finalScoreContainer.style.maxWidth = '90%';
         finalScoreContainer.style.textAlign = 'center';
 
         // Add hover effects
         finalScoreContainer.addEventListener('mouseenter', () => {
-            finalScoreContainer.style.transform = 'translateY(-3px)';
             finalScoreContainer.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.25)';
         });
 
         finalScoreContainer.addEventListener('mouseleave', () => {
-            finalScoreContainer.style.transform = 'translateY(0)';
             finalScoreContainer.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
         });
+
+        // Create share text for X (note: this initial share doesn't include an image URL)
+        const shareText = encodeURIComponent(`I just completed a @TheSecureum Race with @KupiaSecurity! Score: ${finalScore}% (${fullyCorrectCount}/${totalQuestions} correct) in ${completionTime}!`);
+
+        // Create share URL
+        const shareUrl = `https://twitter.com/intent/tweet?text=${shareText}`;
 
         finalScoreContainer.innerHTML = `
             <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">Score: ${finalScore}%</div>
             <div style="font-size: 14px; opacity: 0.9;">Correct: ${fullyCorrectCount}/${totalQuestions} questions</div>
             <div style="font-size: 14px; opacity: 0.9;">Completed in ${completionTime}</div>
-            <div style="margin-top: 12px; font-size: 12px; opacity: 0.8;">
-                Track your progress at <a href="https://kupia.io" target="_blank" style="color: white; text-decoration: none; font-weight: 600;">kupia.io ↗</a>
+            <div style="margin-top: 12px; display: flex; justify-content: center; align-items: center; flex-direction: column; gap: 10px;">
+                <button id="generate-image-btn" style="display: flex; align-items: center; background: #1DA1F2; color: white; text-decoration: none; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; transition: all 0.2s ease; border: none; cursor: pointer;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 6px;">
+                        <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632 3.218 3.203 3.203 0 0 1-.865.115 3.23 3.23 0 0 1-.614-.057 3.283 3.283 0 0 0 3.067 2.277A6.588 6.588 0 0 1 .78 13.58a6.32 6.32 0 0 1-.78-.045A9.344 9.344 0 0 0 5.026 15z"/>
+                    </svg>
+                    Share on X
+                </button>
+                <div id="image-preview" style="display: none; margin-top: 10px; width: 100%;"></div>
+            </div>
+            <div style="margin-top: 8px; font-size: 12px; opacity: 0.8;">
+                Powered by <a href="https://kupia.io" target="_blank" style="color: white; text-decoration: none; font-weight: 600;">kupia.io ↗</a>
             </div>
         `;
 
         document.body.appendChild(finalScoreContainer);
+
+        // Add event listener to generate image button
+        document.getElementById('generate-image-btn').addEventListener('click', () => {
+            this.generateResultImage(pageTitle, finalScore, fullyCorrectCount, totalQuestions, completionTime);
+        });
+    }
+
+    uploadToImgBB(dataUrl, callback) {
+        // Remove the data:image/png;base64, part
+        const base64Image = dataUrl.split(',')[1];
+
+        // ImgBB API key - this should be replaced with the actual key
+        const apiKey = '251658d04c922c72e5b1134c94365ec0'; // Replace with actual key
+
+        // Create form data
+        const formData = new FormData();
+        formData.append('image', base64Image);
+
+        // Make API request
+        fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Extract direct image URL and viewer URL from the response
+                // The API response structure is:
+                // {
+                //   data: {
+                //     url_viewer: "https://ibb.co/2ndCYJK", <- This is what we need for sharing
+                //     url: "https://i.ibb.co/w04Prt6/c1f64245afb2.gif",
+                //     display_url: "https://i.ibb.co/98W13PY/c1f64245afb2.gif",
+                //     ...
+                //   },
+                //   success: true
+                // }
+
+                let directImageUrl = '';
+                let viewerUrl = '';
+
+                // Get the viewer URL for sharing on social media
+                if (data.data.url_viewer) {
+                    viewerUrl = data.data.url_viewer;
+                }
+
+                // Get the direct image URL for other purposes
+                if (data.data.image && data.data.image.url) {
+                    directImageUrl = data.data.image.url;
+                } else if (data.data.url) {
+                    directImageUrl = data.data.url;
+                } else if (data.data.display_url && data.data.display_url.includes('i.ibb.co')) {
+                    directImageUrl = data.data.display_url;
+                } else {
+                    directImageUrl = data.data.display_url || '';
+                }
+
+                // Transform the URL from ImgBB format to kupia.io format
+                let kupiaUrl = directImageUrl;
+                if (directImageUrl && directImageUrl.includes('i.ibb.co')) {
+                    try {
+                        // Extract the image identifier parts
+                        const urlParts = directImageUrl.split('i.ibb.co/')[1].split('/');
+                        if (urlParts.length >= 2) {
+                            // Construct the new URL format
+                            kupiaUrl = `https://www.kupia.io/image/${urlParts[0]}%2F${urlParts[1]}`;
+                        }
+                    } catch (e) {
+                        console.error('Error transforming URL:', e);
+                        // Keep original URL if transformation fails
+                    }
+                }
+
+                callback(true, {
+                    url: directImageUrl,  // The direct image URL
+                    url_viewer: viewerUrl, // The viewer URL for sharing
+                    display_url: kupiaUrl, // The transformed kupia.io URL
+                    delete_url: data.data.delete_url
+                });
+            } else {
+                console.error('ImgBB upload failed:', data);
+                callback(false, null);
+            }
+        })
+        .catch(error => {
+            console.error('Error uploading to ImgBB:', error);
+            callback(false, null);
+        });
+    }
+
+    generateResultImage(pageTitle, finalScore, fullyCorrectCount, totalQuestions, completionTime) {
+        // Change button text immediately to show action is happening
+        document.getElementById('generate-image-btn').textContent = 'Regenerate Image';
+
+        // Create canvas for image generation
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 600;
+        const ctx = canvas.getContext('2d');
+
+        // Create background gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#6c5ce7');
+        gradient.addColorStop(1, '#a29bfe');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Add some design elements - subtle patterns
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        for (let i = 0; i < 5; i++) {
+            ctx.beginPath();
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const radius = 50 + Math.random() * 300;
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        // Add a subtle overlay pattern
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+        for (let x = 0; x < canvas.width; x += 20) {
+            for (let y = 0; y < canvas.height; y += 20) {
+                if (Math.random() > 0.5) {
+                    ctx.fillRect(x, y, 10, 10);
+                }
+            }
+        }
+
+        // Set text styles - use more elegant font stack
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+
+        // Draw title with better text wrapping
+        const maxWidth = canvas.width - 100;
+        const wrapText = (text, x, y, maxWidth, lineHeight) => {
+            const words = text.split(' ');
+            let line = '';
+            let lines = [];
+
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = ctx.measureText(testLine);
+                const testWidth = metrics.width;
+
+                if (testWidth > maxWidth && n > 0) {
+                    lines.push(line);
+                    line = words[n] + ' ';
+                } else {
+                    line = testLine;
+                }
+            }
+            lines.push(line);
+
+            // Return if too many lines
+            if (lines.length > 2) {
+                lines = lines.slice(0, 2);
+                lines[1] = lines[1].substring(0, lines[1].length - 4) + '...';
+            }
+
+            for (let i = 0; i < lines.length; i++) {
+                ctx.fillText(lines[i], x, y + (i * lineHeight));
+            }
+
+            return lines.length;
+        };
+
+        // Draw title with elegant font
+        ctx.font = '600 36px "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        const titleLines = wrapText(pageTitle, canvas.width / 2, 100, maxWidth, 50);
+
+        // Adjust vertical positions based on title lines
+        const titleOffset = (titleLines - 1) * 30;
+
+        // Draw score with a background circle
+        const scoreY = 230 + titleOffset;
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, scoreY - 20, 120, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.fill();
+
+        ctx.font = '700 120px "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        ctx.fillStyle = 'white';
+        ctx.fillText(`${finalScore}%`, canvas.width / 2, scoreY);
+
+        // Draw correct answers with improved styling
+        ctx.font = '600 46px "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        ctx.fillText(`${fullyCorrectCount}/${totalQuestions} Correct Answers`, canvas.width / 2, scoreY + 100);
+
+        // Draw completion time with icon
+        ctx.font = '500 36px "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        ctx.fillText(`Completed in ${completionTime}`, canvas.width / 2, scoreY + 170);
+
+        // Add a divider line
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2 - 150, scoreY + 210);
+        ctx.lineTo(canvas.width / 2 + 150, scoreY + 210);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Draw Secureum Race Runner text with improved styling
+        ctx.font = '600 30px "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        ctx.fillText('Secureum Race Runner', canvas.width / 2, scoreY + 260);
+
+        // Draw kupia.io text with logo styling
+        ctx.font = '500 24px "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        ctx.fillText('Powered by kupia.io', canvas.width / 2, scoreY + 300);
+
+        // Convert canvas to data URL
+        const dataUrl = canvas.toDataURL('image/png');
+
+        // Create image element to preview
+        const imagePreview = document.getElementById('image-preview');
+        imagePreview.style.display = 'block';
+        imagePreview.style.margin = '0 auto';
+        imagePreview.style.maxWidth = '100%';
+
+        // Show loading state with the generated image clearly visible
+        imagePreview.innerHTML = `
+            <div style="text-align: center; padding: 10px; margin: 0 auto; max-width: 320px;">
+                <div style="margin-bottom: 8px; font-weight: 500;">Uploading image...</div>
+                <img src="${dataUrl}" style="width: 100%; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+                <div style="display: flex; justify-content: center; margin-top: 10px;">
+                    <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #1DA1F2; animation: spin 1s linear infinite;"></div>
+                </div>
+                <style>
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
+                </style>
+            </div>
+        `;
+
+        // Upload to ImgBB
+        this.uploadToImgBB(dataUrl, (success, result) => {
+            if (success) {
+                // Use the ImgBB sharing URL (data.data.url_viewer) instead of the kupia.io URL
+                const tweetText = `I just completed a @TheSecureum Race with @KupiaSecurity! Score: ${finalScore}% (${fullyCorrectCount}/${totalQuestions} correct) in ${completionTime}! ${result.url_viewer}`;
+                const shareText = encodeURIComponent(tweetText);
+
+                imagePreview.innerHTML = `
+                    <div style="text-align: center; margin: 0 auto; max-width: 350px;">
+                        <img src="${dataUrl}" style="width: 100%; max-width: 300px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <a href="${dataUrl}" download="secureum-race-result.png" style="background: #2ecc71; color: white; text-decoration: none; padding: 8px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                                </svg>
+                                Download Image
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?text=${shareText}" target="_blank" style="background: #1DA1F2; color: white; text-decoration: none; padding: 8px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+                                    <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632 3.218 3.203 3.203 0 0 1-.865.115 3.23 3.23 0 0 1-.614-.057 3.283 3.283 0 0 0 3.067 2.277A6.588 6.588 0 0 1 .78 13.58a6.32 6.32 0 0 1-.78-.045A9.344 9.344 0 0 0 5.026 15z"/>
+                                </svg>
+                                Share on X
+                            </a>
+                        </div>
+                        <div style="margin-top: 12px; font-size: 13px; opacity: 0.9; text-align: center;">
+                            For best results: Download image and manually attach to your tweet
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Fallback to download only if upload fails
+                imagePreview.innerHTML = `
+                    <div style="text-align: center; margin: 0 auto; max-width: 350px;">
+                        <img src="${dataUrl}" style="width: 100%; max-width: 300px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+                        <div style="margin-bottom: 10px; color: #ff4757;">Image upload failed. You can still download and share manually.</div>
+                        <div style="display: flex; justify-content: center;">
+                            <a href="${dataUrl}" download="secureum-race-result.png" style="background: #2ecc71; color: white; text-decoration: none; padding: 8px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
+                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                                </svg>
+                                Download Image
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+        });
     }
 
     formatTime(seconds) {
