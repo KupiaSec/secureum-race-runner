@@ -11,6 +11,7 @@ A browser extension that helps security researchers simulate Secureum races in a
 - Provides a clean, distraction-free practice environment
 - Generate and share beautiful result cards directly to social media
 
+![Screenshot](https://i.ibb.co/ym0ggZ2C/screenshot-78.png)
 ## Installation
 
 1. **Download the Extension**
