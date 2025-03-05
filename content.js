@@ -558,7 +558,8 @@ class SecureumRace {
 
         this.solutions.forEach(solution => {
             const solutionText = solution.textContent;
-            const correctMatch = solutionText.match(/Correct is ([A-D,\s]+)\./i); // Made case insensitive
+            // Match both "Correct is" and "Correct Answers:" formats
+            const correctMatch = solutionText.match(/Correct (?:is|Answers:) ([A-D,\s]+)\.?/i);
 
             if (correctMatch) {
                 const correctOptions = correctMatch[1].split(',').map(opt => opt.trim());
