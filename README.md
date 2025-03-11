@@ -1,6 +1,6 @@
 # Secureum Race Runner
 
-A browser extension that helps security researchers simulate Secureum races in a realistic environment. Secureum hosts excellent smart contract security challenges at https://ventral.digital/posts/, but their live races fill up quickly. This tool lets you practice these challenges as if you were in a real race.
+A browser extension that helps security researchers simulate Secureum races in a realistic environment. Secureum hosts excellent smart contract security challenges at [Ventral Digital's Blog](https://ventral.digital/secureum-auditor-bootcamp-2021-quizzes/), but their live races fill up quickly. This tool lets you practice these challenges as if you were in a real race.
 
 ## Features
 
