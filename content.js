@@ -216,31 +216,31 @@ class SecureumRace {
 
     makeOptionsClickable() {
         // Find all checkboxes
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]')
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
         checkboxes.forEach(checkbox => {
             // Find the parent element (typically a label or list item)
-            const parentElement = checkbox.parentElement
+            const parentElement = checkbox.parentElement;
 
             if (parentElement) {
                 // Make the parent element look clickable with a cursor pointer
-                parentElement.style.cursor = "pointer"
+                parentElement.style.cursor = 'pointer';
 
                 // Add click event to the parent element
-                parentElement.addEventListener("click", event => {
+                parentElement.addEventListener('click', (event) => {
                     // Prevent clicks on the checkbox itself from being processed twice
                     if (event.target !== checkbox) {
-                        event.preventDefault()
+                        event.preventDefault();
                         // Toggle the checkbox state
-                        checkbox.checked = !checkbox.checked
+                        checkbox.checked = !checkbox.checked;
 
                         // Dispatch a change event on the checkbox to trigger any existing event handlers
-                        const changeEvent = new Event("change", { bubbles: true })
-                        checkbox.dispatchEvent(changeEvent)
+                        const changeEvent = new Event('change', { bubbles: true });
+                        checkbox.dispatchEvent(changeEvent);
                     }
-                })
+                });
             }
-        })
+        });
     }
 
     addAdvertisement(sentence, theme) {
@@ -574,7 +574,19 @@ class SecureumRace {
                     // Calculate score for this question
                     const correctCount = correctOptions.filter(opt => userSelectedOptions.includes(opt)).length;
                     const incorrectCount = userSelectedOptions.length - correctCount;
-                    const score = Math.max(0, (correctCount / correctOptions.length) - (incorrectCount / (4 - correctOptions.length)));
+
+                    // Count the total number of options for this question
+                    const totalOptions = questionElement.querySelectorAll('input[type="checkbox"]').length;
+
+                    // Fix for when all options are correct (avoid division by zero)
+                    let score;
+                    if (correctOptions.length === totalOptions) {
+                        // When all options are correct, just check if user selected all options
+                        score = (correctCount === totalOptions && incorrectCount === 0) ? 1 : 0;
+                    } else {
+                        // Original formula but using dynamic total options count
+                        score = Math.max(0, (correctCount / correctOptions.length) - (incorrectCount / (totalOptions - correctOptions.length)));
+                    }
 
                     correctAnswers += score;
 
@@ -1035,33 +1047,11 @@ class SecureumRace {
         return `${minutes}m ${remainingSeconds}s`;
     }
 
-    makeOptionsClickable() {
-        // Find all checkboxes
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-
-        checkboxes.forEach(checkbox => {
-            // Find the parent element (typically a label or list item)
-            const parentElement = checkbox.parentElement;
-
-            if (parentElement) {
-                // Make the parent element look clickable with a cursor pointer
-                parentElement.style.cursor = 'pointer';
-
-                // Add click event to the parent element
-                parentElement.addEventListener('click', (event) => {
-                    // Prevent clicks on the checkbox itself from being processed twice
-                    if (event.target !== checkbox) {
-                        event.preventDefault();
-                        // Toggle the checkbox state
-                        checkbox.checked = !checkbox.checked;
-
-                        // Dispatch a change event on the checkbox to trigger any existing event handlers
-                        const changeEvent = new Event('change', { bubbles: true });
-                        checkbox.dispatchEvent(changeEvent);
-                    }
-                });
-            }
-        });
+    // Get the total number of options for a question
+    getTotalOptionsCount(questionElement) {
+        // Count the number of checkboxes in the question element
+        const checkboxes = questionElement.querySelectorAll('input[type="checkbox"]');
+        return checkboxes.length;
     }
 
     clickNavigationButtons() {
