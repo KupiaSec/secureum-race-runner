@@ -581,8 +581,13 @@ class SecureumRace {
                     // Fix for when all options are correct (avoid division by zero)
                     let score;
                     if (correctOptions.length === totalOptions) {
-                        // When all options are correct, just check if user selected all options
-                        score = (correctCount === totalOptions && incorrectCount === 0) ? 1 : 0;
+                        // When all options are correct, give partial credit based on correct selections
+                        // Calculate the ratio of correct answers selected
+                        score = correctCount / totalOptions;
+                        // Penalize for incorrect selections (there shouldn't be any in this case)
+                        if (incorrectCount > 0) {
+                            score = 0; // If any wrong options are selected when all are correct, score is 0
+                        }
                     } else {
                         // Original formula but using dynamic total options count
                         score = Math.max(0, (correctCount / correctOptions.length) - (incorrectCount / (totalOptions - correctOptions.length)));
